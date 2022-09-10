@@ -143,14 +143,32 @@ const showStats = async (req, res) => {
         _id: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
         count: { $sum: 1 },
       },
-    }, //[ { _id: { year: 2022, month: 9 }, count: 75 } ]
+    },
     { $sort: { '_id.year': -1, '_id.month': -1 } },
     { $limit: 6 },
   ]);
-  console.log(monthlyApplications);
+  // console.log(monthlyApplications);
+  //[ { _id: { year: 2022, month: 9 }, count: 75 } ]
+
+  monthlyApplications = monthlyApplications
+    .map((item) => {
+      const {
+        _id: { year, month },
+        count,
+      } = item;
+      const date = moment()
+        .month(month - 1)
+        .year(year)
+        .format('MMM Y');
+      return { date, count };
+    })
+    .reverse();
+  // console.log(monthlyApplications);
+  // [{ date: 'Sep 2022', count: 75 }];
+
   res.status(StatusCodes.OK).json({
     defaultStats,
-    monthlyApplications: [],
+    monthlyApplications,
   });
 };
 
