@@ -114,10 +114,30 @@ const showStats = async (req, res) => {
     { $match: { createdBy: mongoose.Types.ObjectId(req.user.userId) } },
     { $group: { _id: '$status', count: { $sum: 1 } } },
   ]);
-  console.log(stats);
+  //   console.log(stats);
+  // [
+  //   { _id: 'pending', count: 32 },
+  //   { _id: 'interview', count: 21 },
+  //   { _id: 'declined', count: 22 },
+  // ];
+
+  // refactor stats for the frontend
+  stats = stats.reduce((acc, curr) => {
+    const { _id: title, count } = curr;
+    acc[title] = count;
+    return acc;
+  }, {});
+  // console.log(stats);
+  // { pending: 32, interview: 21, declined: 22 }
+
+  const defaultStats = {
+    pending: stats.pending || 0,
+    interview: stats.interview || 0,
+    declined: stats.declined || 0,
+  };
 
   res.status(StatusCodes.OK).json({
-    defaultStats: {},
+    defaultStats,
     monthlyApplications: [],
   });
 };
